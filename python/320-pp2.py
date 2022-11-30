@@ -1,3 +1,4 @@
+
 '''
 Python code to read the CSV file for COMPSCI 320 Programming Project 2
 Zach Oster, 2022-11-21
@@ -40,6 +41,7 @@ def extract(query_func, billdata_path):
     billdata = read_billdata_csv(billdata_path)
     # Fill in the rest here. It's possible to finish this function
     # with 1 more line of code, but you can use more if needed.
+    return filter(query_func,billdata)
 
 ## Query functions ##
 
@@ -52,10 +54,14 @@ def is_Canadian(customer):
 # ordered_this_month: true iff the customer ordered any items this
 # month; expects one argument, a dictionary (dict) containing one
 # customer's billing data
+def ordered_this_month(customer):
+    return int(customer['Items Ordered This Month']) > 0
 
 # has_zero_balance: true iff the customer has a zero balance; expects
 # one argument, a dictionary (dict) containing one customer's billing
 # data
+def has_zero_balance(customer):
+    return float(customer['Amount To Pay']) == 0
 
 # Sample query function (actually a factory function): expects a string.
 # Creates and returns a function, which returns true iff a given customer's
@@ -72,24 +78,42 @@ def postcode_begins_with(prefix):
 # due date is before the given date.
 #   * Your due_before function will use a lambda, similar to
 #     postcode_begins_with, but the comparison will be a little different.
-
+def due_before(date):
+    query_func = lambda customer: int(customer['Due Date']) < date
+    return query_func
 
 ### Main program ###
 
 # You can hard-code the data set's location into your main program. This code
 # assumes that the data set is in the same directory/folder as the code.
-billdata_path = './cs320-F22-pp2-data.csv'
+billdata_path = 'cs320-F22-pp2-data.csv'
 
 ## Fill in code below here to generate the report.
 ## I've included some sample code to give you some ideas, but the sample
 ## code **will not work** until you complete the extract function.
 
 ### Demonstrating query function: print only the names of Canadian customer(s)
-##print('----------')
-##print('Customer(s) with address(es) in Canada:')
-##for customer in extract(is_Canadian, billdata_path):
-##    print(customer['First Name'], customer['Last Name'])
+print('----------')
+print('Customer(s) with address(es) in Canada:')
+for customer in extract(is_Canadian, billdata_path):
+   print(customer['First Name'], customer['Last Name'])
 ##
+print('----------')
+print('Customer(s) who ordered item(es) this month:')
+for customer in extract(ordered_this_month, billdata_path):
+   print(customer['First Name'], customer['Last Name'])
+   
+##
+print('----------')
+print('Customer(s) with a balance of zero:')
+for customer in extract(has_zero_balance, billdata_path):
+   print(customer['First Name'], customer['Last Name'])
+   
+##
+print('----------')
+print('Customer(s) with due date(es) before 2022/12/25 aka christmass:')
+for customer in extract(due_before(20221225), billdata_path):
+   print(customer['First Name'], customer['Last Name'])
 ### Demonstrating query function: print names of customers whose postcodes
 ### begin with the string 547
 print('----------')
