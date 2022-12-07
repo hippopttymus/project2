@@ -28,7 +28,7 @@
 (define extract
   (lambda (query-func billdata-path)
     (let ((billdata (read-billdata billdata-path)))
-      (filter query-func billdata))))
+      "Replace this string with a filter function call!")))
 
 
 ;;; Query functions
@@ -44,16 +44,10 @@
 ; ordered_this_month: true iff the customer ordered any items this
 ; month; expects one argument, an association list containing
 ; one customer's billing data
-(define ordered_this_month
-  (lambda (customer)
-    (not (string=?(cdr(assoc "Items Ordered This Month" customer)) "0"))))
 
 
 ; has_zero_balance: true iff the customer has a zero balance; expects no
 ; arguments
-(define has_zero_balance
-  (lambda (customer)
-    (string=?(cdr(assoc "Amount To Pay" customer)) "0")))
 
 
 ; Sample query function (actually a factory function): expects a string.
@@ -96,51 +90,29 @@
     (display str)
     (newline)))
 
- ;Demonstrating query function: print names of customers whose postcodes
- ;begin with the string 547
-(display "----------")
-(newline)
-(display "Customer(s) whose postal codes begin with 547:")
-(newline)
-(for-each println
- (map (lambda (customer)
-                (string-append (cdr (assoc "First Name" customer))
-                               " "
-                               (cdr (assoc "Last Name" customer))))
-             (extract (postcode_begins_with "547") billdata_path)))
-
+; Demonstrating query function: print names of customers whose postcodes
+; begin with the string 547
+;(display "----------")
+;(newline)
+;(display "Customer(s) whose postal codes begin with 547:")
+;(newline)
+;(for-each println
+; (map (lambda (customer)
+;                (string-append (cdr (assoc "First Name" customer))
+;                               " "
+;                               (cdr (assoc "Last Name" customer))))
+;             (extract (postcode_begins_with "547") billdata_path)))
+;
 ;; Demonstrating query function: print only the names of Canadian customer(s)
-(newline)
-(display "----------")
-(newline)
-(display "Customer(s) with address(es) in Canada:")
-(newline)
-(for-each println
- (map (lambda (customer)
-                (string-append (cdr (assoc "First Name" customer))
-                               " "
-                               (cdr (assoc "Last Name" customer))))
-             (extract is_Canadian billdata_path)))
+;(newline)
+;(display "----------")
+;(newline)
+;(display "Customer(s) with address(es) in Canada:")
+;(newline)
+;(for-each println
+; (map (lambda (customer)
+;                (string-append (cdr (assoc "First Name" customer))
+;                               " "
+;                               (cdr (assoc "Last Name" customer))))
+;             (extract is_Canadian billdata_path)))
 
-(display "----------")
-(newline)
-(display "Customer(s) who Ordered nothing: ")
-(newline)
-(for-each println
-          (map (lambda (customer)
-                 (string-append (cdr (assoc "First Name" customer))
-                               " "
-                               (cdr (assoc "Last Name" customer))))
-             (extract ordered_this_month billdata_path)))
-
-
-(display "----------")
-(newline)
-(display "Customer(s) who have zero balance: ")
-(newline)
-(for-each println
-          (map (lambda (customer)
-                 (string-append (cdr (assoc "First Name" customer))
-                               " "
-                               (cdr (assoc "Last Name" customer))))
-             (extract has_zero_balance billdata_path)))
