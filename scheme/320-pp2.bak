@@ -89,7 +89,6 @@
 ; I've included some sample code to give you some ideas, but the sample
 ; code **will not work** until you complete the extract function.
 
-
 ; This function prints a string, followed by a newline.
 ; It will make your output code shorter and easier to read.
 (define println
@@ -101,24 +100,15 @@
  ;begin with the string 547
 (display "----------")
 (newline)
-(display "Number of Customer(s) whose postal codes begin with 547: ")
-(display (extract (postcode_begins_with "547") billdata_path))
-
-(display "----------")
+(display "Customer(s) whose postal codes begin with 547:")
 (newline)
-(display "Number of Customer(s) who Ordered this month : ")
-(length (extract ordered_this_month billdata_path))
+(for-each println
+ (map (lambda (customer)
+                (string-append (cdr (assoc "First Name" customer))
+                               " "
+                               (cdr (assoc "Last Name" customer))))
+             (extract (postcode_begins_with "547") billdata_path)))
 
-(newline)
-(display "----------")
-(newline)
-(display "Number of Customer(s) from whitewater who ordered this month :")
-(for-each (map (lambda (customer) (string-append(cdr (assoc "First Name" customer)))) (extract (postcode_begins_with "53191") billdata_path)))
-
-;;(lambda (customer)
-;;                (string-append (cdr (assoc "First Name" customer))
-;;                               " "
-;;                               (cdr (assoc "Last Name" customer))))
 ;; Demonstrating query function: print only the names of Canadian customer(s)
 (newline)
 (display "----------")
