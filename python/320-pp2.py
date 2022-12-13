@@ -3,7 +3,7 @@
 Python code to read the CSV file for COMPSCI 320 Programming Project 2
 Zach Oster, 2022-11-21
 '''
-
+import statistics
 import sys
 import csv
 
@@ -94,31 +94,88 @@ billdata_path = 'cs320-F22-pp2-data.csv'
 
 ### Demonstrating query function: print only the names of Canadian customer(s)
 print('----------')
-print('Customer(s) with address(es) in Canada:')
-for customer in extract(is_Canadian, billdata_path):
-   print(customer['First Name'], customer['Last Name'])
-##
+# print('Customer(s) with address(es) in Canada:')
+# for customer in extract(is_Canadian, billdata_path):
+#    print(customer['First Name'], customer['Last Name'])
+
+print("Caution the moving walkway is ending")
+
 print('----------')
-print('Customer(s) who ordered item(es) this month:')
+numcust =0
 for customer in extract(ordered_this_month, billdata_path):
-   print(customer['First Name'], customer['Last Name'])
-   
+   numcust = numcust + 1
+print(f'{numcust} Customer(s) ordered item(es) this month')
+
 ##
 print('----------')
-print('Customer(s) with a balance of zero:')
+numcustwhitewater = 0
+for customer in extract(postcode_begins_with('53190'), billdata_path):
+    if(int(customer['Items Ordered This Month']) > 0):
+        numcustwhitewater = numcustwhitewater + 1
+print(f'{numcustwhitewater} Customer(s) who ordered item(es) this month live in whitewater...GO WARHAWKS! ')
+
+##
+
+print('----------')
+avbatal = []
+numberoforders = 0
+for customer in extract(ordered_this_month, billdata_path):
+    numberoforders = numberoforders + 1
+    avbatal.append(float(customer['Amount To Pay']))
+avbal = round(statistics.fmean(avbatal),2)
+print(f'{avbal} Is the average balance of the {numberoforders} Customer(s) who ordered item(es) this month')
+
+##
+print('----------')
+numzerobal = 0
+#print('Customer(s) with a balance of zero:')
 for customer in extract(has_zero_balance, billdata_path):
-   print(customer['First Name'], customer['Last Name'])
+    #print(customer['First Name'], customer['Last Name'])
+    numzerobal = numzerobal + 1
+print(f'{numzerobal} Customer(s) have a balance of zero')
    
 ##
 print('----------')
-print('Customer(s) with due date(es) before 2022/12/25 aka christmass:')
-for customer in extract(due_before(20221225), billdata_path):
-   print(customer['First Name'], customer['Last Name'])
+numoverdue = 0
+overduebaltal = []
+maxoverdue = 0
+maxoverduecustomer = None
+# print('Customer(s) with due date(es) before 2022/11/30:')
+for customer in extract(due_before(20221130), billdata_path):
+    if(float(customer['Amount To Pay']) > 0):
+        numoverdue = numoverdue + 1
+        amountduee = float(customer['Amount To Pay'])
+        overduebaltal.append(amountduee)
+        if(amountduee > maxoverdue):
+            maxoverdue = amountduee
+            maxoverduecustomer = customer
+
+           
+print(f'{numoverdue} Customer(s) have overdue accounts')
+
+mean_over_due_bal = round(statistics.fmean(overduebaltal), 2)
+
+print('----------')
+
+print(f'Average balance for {numoverdue} customers who have overdue accounts is: ${mean_over_due_bal}')
+print('----------')
+fname = maxoverduecustomer['First Name']
+lname = maxoverduecustomer['Last Name']
+postal = maxoverduecustomer['Postal Code']
+
+print(f'{fname} {lname} is the customer with the largest overdue balance of {maxoverdue}. Their postcode is {postal}...bring me their head')
+print('----------')
+
+
+
+
 ### Demonstrating query function: print names of customers whose postcodes
 ### begin with the string 547
-print('----------')
-print('Customer(s) whose postal codes begin with 547:')
-for customer in extract(postcode_begins_with('547'), billdata_path):
-    print(customer['First Name'], customer['Last Name'], customer['Postal Code'])
+
+
+# print('----------')
+# print('Customer(s) whose postal codes begin with 547:')
+# for customer in extract(postcode_begins_with('547'), billdata_path):
+#     print(customer['First Name'], customer['Last Name'], customer['Postal Code'])
 
                 
