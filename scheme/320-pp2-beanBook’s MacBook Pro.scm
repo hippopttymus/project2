@@ -30,16 +30,29 @@
     (let ((billdata (read-billdata billdata-path)))
       (filter query-func billdata))))
 
+;; sum function
+(define (sum x)
+    (if (null? x)
+        0
+        (+ (string->number (car x)) (sum (cdr x)))))
+
+;; average function
+(define (average x)
+  
+    (/ (sum x) (length x)))
+
+;; display average
+;;(display (exact->inexact (average x))
 
 ;;; Query functions
 
 ; Sample query function: returns true for each customer who is in Canada.
 ; Input: an association list containing one customer's billing data
 ; Output: true if the customer's address is in Canada, false otherwise
-(define is_Canadian
+(define is_us
   (lambda (customer)
     ; note: string=? is like eq? or equal?, but specifically for strings
-    (string=? (cdr (assoc "Country" customer)) "CA")))
+    (string=? (cdr (assoc "Country" customer)) "US")))
 
 ; ordered_this_month: true iff the customer ordered any items this
 ; month; expects one argument, an association list containing
@@ -48,6 +61,10 @@
   (lambda (customer)
     (not (string=?(cdr(assoc "Items Ordered This Month" customer)) "0"))))
 
+;; find customers who ordered nothing
+(define ordered_nothing
+  (lambda (customer)
+    (string=?(cdr(assoc "Items Ordered This Month" customer)) "0")))
 
 ; has_zero_balance: true iff the customer has a zero balance; expects no
 ; arguments
@@ -72,11 +89,21 @@
                   (substring customer-postcode 0 prefix-length))))))
                   
 
-; due_before: a factory function. Expects an integer that encodes a date.
-; Creates and returns a function, which returns true iff the customer's
+; due_before: a factory function. Expects an integer that encodes a date.o; Creates and returns a function, which returns true iff the customer's
 ; due date is before the given date.
 ;   * Your due_before function will use a lambda nested inside a lambda,
 ;     similar to postcode_begins_with, but the comparison will be different.
+(define due_before
+   (lambda (date)
+     (lambda (customer)
+       (< (string->number(cdr(assoc "Due Date" customer))) date))))
+
+
+(define get_cust
+   (lambda (duemount)
+     (lambda (customer)
+       (= (string->number(cdr(assoc "Amount To Pay" customer))) duemount))))
+    
       
 
 ;;; Main program
@@ -96,51 +123,89 @@
     (display str)
     (newline)))
 
+
+
+
  ;Demonstrating query function: print names of customers whose postcodes
  ;begin with the string 547
-(display "----------")
-(newline)
-(display "Customer(s) whose postal codes begin with 547:")
-(newline)
-(for-each println
- (map (lambda (customer)
-                (string-append (cdr (assoc "First Name" customer))
-                               " "
-                               (cdr (assoc "Last Name" customer))))
-             (extract (postcode_begins_with "547") billdata_path)))
-
+;;(display "----------")
+;;(newline)
+;;(display "Customer(s) whose postal codes begin with 547:")
+;;(newline)
+;;(for-each println
+;; (map (lambda (customer)
+;;                (string-append (cdr (assoc "First Name" customer))
+;;                               " "
+;;                               (cdr (assoc "Last Name" customer))))
+;;             (extract  (postcode_begins_with "547") billdata_path)))
+;;
 ;; Demonstrating query function: print only the names of Canadian customer(s)
-(newline)
+;;(newline)
+;;(display "----------")
+;;(newline)
+;;(display "Customer(s) with address(es) in USA")
+;;(newline)
+;;(for-each println
+;; (map (lambda (customer)
+;;                (string-append (cdr (assoc "First Name" customer))
+;;                               " "
+;;                               (cdr (assoc "Last Name" customer))))
+;;             (extract is_us billdata_path)))
+
 (display "----------")
 (newline)
-(display "Customer(s) with address(es) in Canada:")
+(display "Number of Customer(s) who Ordered Something :  ")
+(length (extract ordered_this_month billdata_path))
+
+(display "----------")
 (newline)
+(display "Number of Customer(s) from white water who ordered something this month :  ")
+(length (filter (postcode_begins_with "53190") (filter is_us  (extract ordered_this_month billdata_path))))
+
+
+(display "----------")
+(newline)
+(display "Average Balance of Customer(s) who ordered something this month : $ ")
+(average(map (lambda (customer) (cdr (assoc "Amount To Pay" customer))) (extract ordered_this_month billdata_path)))
+
+
+(display "----------")
+(newline)
+(display "Number of Customer(s) who have zero balances: ")
+(length(extract has_zero_balance billdata_path))
+
+(display "----------")
+(newline)
+(display "Number of customers who have overdue accounts (due before November 30, 2022) : ")
+(length(extract (due_before 20221130) billdata_path))
+
+
+
+(display "----------")
+(newline)
+(display "Average balance for customers who have overdue accounts is : $ ")
+(average(map (lambda (customer) (cdr (assoc "Amount To Pay" customer))) (extract (due_before 20221130) billdata_path)))
+
+(display "----------")
+(newline)
+(display "The customer with the largest overdue balance is:  ")
 (for-each println
  (map (lambda (customer)
+        (string-append
                 (string-append (cdr (assoc "First Name" customer))
                                " "
-                               (cdr (assoc "Last Name" customer))))
-             (extract is_Canadian billdata_path)))
-
-(display "----------")
-(newline)
-(display "Customer(s) who Ordered nothing: ")
-(newline)
-(for-each println
-          (map (lambda (customer)
-                 (string-append (cdr (assoc "First Name" customer))
-                               " "
-                               (cdr (assoc "Last Name" customer))))
-             (extract ordered_this_month billdata_path)))
+                               (cdr (assoc "Last Name" customer))) " " (cdr (assoc "Postal Code" customer))))
+      
+(extract (get_cust (apply max(map (lambda (customer) (string->number (cdr (assoc "Amount To Pay" customer)))) (extract (due_before 20221130) billdata_path)))) billdata_path)))
 
 
-(display "----------")
-(newline)
-(display "Customer(s) who have zero balance: ")
-(newline)
-(for-each println
-          (map (lambda (customer)
-                 (string-append (cdr (assoc "First Name" customer))
-                               " "
-                               (cdr (assoc "Last Name" customer))))
-             (extract has_zero_balance billdata_path)))
+
+
+
+
+
+
+
+
+
+         
